@@ -6,11 +6,12 @@ library(DT)
 
 library(shinydashboard)
 
-tcga_sets_df<-data.frame(name=c("TCGA-COADREAD_mrna","TCGA-COADREAD_mirna")
-                         ,file=c("/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_rseq.rds","/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_mirna.rds")
+tcga_sets_df<-data.frame(name=c("TCGA-COADREAD_mirna","TCGA-COADREAD_mrna")
+                         ,file=c("/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_mirna.rds","/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_rseq.rds")
                          ,stringsAsFactors = F)
 
-
+selected_cols= c("gene","cor","FoldChange", "pvalue", "padj" )
+allcn<-c("gene","type","log2FoldChange","FoldChange" ,"ratio","pvalue", "padj","baseMean" ,"N BaseMean" ,"T BaseMean" )
 header <- dashboardHeader()
 
 sidebar <-   dashboardSidebar(
@@ -20,7 +21,7 @@ sidebar <-   dashboardSidebar(
     menuItem("TCGA_expression", tabName = "TCGA expression" ,icon = icon("list-alt"),
              # Input directly under menuItem
              selectInput("tcga_sel", "Data sets",
-                         choices = c(unique(tcga_sets_df$name)), multiple=F, selectize=TRUE,
+                         choices = c(unique(tcga_sets_df$name)), multiple=F, selectize=TRUE,selected =  NULL,
                          width = '98%')
     )
   )
@@ -43,8 +44,20 @@ body <-   dashboardBody(
   #   
     # Second tab content
     tabItem(tabName = "TCGA_expression",
-            fluidRow( h2(verbatimTextOutput('test')),
-                      DT::dataTableOutput('tbl'))
+            fluidRow( column(6,
+                             h2(verbatimTextOutput('test')),
+                             checkboxInput("selcols", tags$b("Modify Columns:")),
+                             conditionalPanel(
+                               condition = "input.selcols == true",
+                               checkboxGroupInput('sel_cols', 'Columns to Display:',
+                                                  # allcn[!allcn %in% c("type",
+                                                  #                     "baseMean",
+                                                  #                     "N BaseMean",
+                                                  #                     "T BaseMean")],
+                                                  allcn,
+                                                  selected = selected_cols)
+                             ),
+                             DT::dataTableOutput('tbl')))
            
     )
   # )
@@ -60,17 +73,26 @@ server <- function(input, output) {
       list(res=cancerlist[["res"]],dds=cancerlist[["dds"]],res_tab=cancerlist[["res_tab"]],factor_list=cancerlist[["factor_list"]],words=cancerlist[["words"]])
   }) 
   
+  
   res_tab<- reactive({
-    data.table(data_f()$res_tab)
+    dt<-data.table(data_f()$res_tab,stringsAsFactors = F)
+    #allcn<<-colnames(dt)
+    cols<-colnames(dt)[!colnames(dt) %in% c("gene","type")]
+    data.table(data_f()$res_tab)[,(cols):=lapply(.SD, function(x) as.numeric(formatC(as.numeric(x),digits =5,format = "g"))),.SDcols=cols]
+   # data.table(data_f()$res_tab)
   })
   
   output$tbl = DT::renderDataTable(
     #{
     #datatable(
     
-    res_tab(),
-    extensions = 'Buttons',
-    class = 'compact',
+    res_tab()[,input$sel_cols, with = F],
+    #res_tab(),
+    selection = list(
+      mode = "single",
+      target = "row",
+      selected = c(1)
+    ),
     filter = 'top',
     caption = '',
     options = list(
@@ -81,9 +103,10 @@ server <- function(input, output) {
       #                list(extend='csv',filename=paste("coexp_gene",input$qgene,input$corr[2],input$corr[1],sep="_")),
       #                list(extend='excel',filename=paste("coexp_gene",input$qgene,input$corr[2],input$corr[1],sep="_"))
       #                ),
-      pageLength = 5,
+      pageLength = 10,
       lengthMenu = c(5, 10, 15, 20),
-      autoWidth = TRUE
+      autoWidth = TRUE, scrollX=TRUE,
+      selection = 'single'
     ),
     rownames = FALSE
     # )
@@ -91,10 +114,14 @@ server <- function(input, output) {
     , server = T)
   
   output$test = renderPrint({
-   cat(input$tcga_sel)  
+  s=input$tbl_rows_selected
+  cat(input$tcga_sel)
+  cat("\n")
+  cat(as.character(res_tab()[["gene"]])[s]) 
   })
   
-  
+  # s=input$tbl_rows_selected
+  # #s=input$tbl_row
 }
 
 shinyApp(ui, server)
