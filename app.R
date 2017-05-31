@@ -21,38 +21,22 @@ header <- dashboardHeader()
 sidebar <-   dashboardSidebar(
   useShinyjs(),
   sidebarMenu(
-    menuItem("TCGA Expression", tabName = "tcgaexpression" ,icon = icon("list-alt")),
-    selectInput("tcga_sel", "Data sets",
-                choices = c(unique(tcga_sets_df$name)), multiple=F, selectize=TRUE,selected =  NULL,
-                width = '98%'),
     menuItem("ANNOVAR annotation", tabName = "annovar" ,icon = icon("list-alt")),
     selectInput("annovar_folder_sel", "Folder",
                 choices = c(unique(annovar_folder)), multiple=F, selectize=TRUE,selected =  NULL,
                 width = '98%'),
-    menuItem("Widgets", tabName = "widgets", icon = icon("list-alt"))
+    menuItem("TCGA Expression", tabName = "tcgaexpression" ,icon = icon("list-alt")),
+    selectInput("tcga_sel", "Data sets",
+                choices = c(unique(tcga_sets_df$name)), multiple=F, selectize=TRUE,selected =  NULL,
+                width = '98%')
+
   )
 )
 
 body <-   dashboardBody(
   useShinyjs(),
    tabItems(
-     tabItem(tabName = "tcgaexpression",h2("Widgets taassdfasb content"),
-             fluidRow( column(6,
-                              h2(verbatimTextOutput('test')),
-                              checkboxInput("selcols", tags$b("Modify Columns:")),
-                              conditionalPanel(
-                                condition = "input.selcols == true",
-                                checkboxGroupInput('sel_cols', 'Columns to Display:',
-                                                   # allcn[!allcn %in% c("type",
-                                                   #                     "baseMean",
-                                                   #                     "N BaseMean",
-                                                   #                     "T BaseMean")],
-                                                   allcn,
-                                                   selected = selected_cols)
-                              ),
-                              DT::dataTableOutput('tbl')))
-             
-     ),
+     
      tabItem(tabName = "annovar",
              fluidRow( column(6,
                               h3(paste0("1. Create a folder under RA_files\\app\\annovar \n")),
@@ -73,8 +57,22 @@ body <-   dashboardBody(
                        )
   
      ),
-     tabItem(tabName = "widgets",
-             h2("Widgets tab content")
+     tabItem(tabName = "tcgaexpression",h2("Widgets taassdfasb content"),
+             fluidRow( column(6,
+                              h2(verbatimTextOutput('test')),
+                              checkboxInput("selcols", tags$b("Modify Columns:")),
+                              conditionalPanel(
+                                condition = "input.selcols == true",
+                                checkboxGroupInput('sel_cols', 'Columns to Display:',
+                                                   # allcn[!allcn %in% c("type",
+                                                   #                     "baseMean",
+                                                   #                     "N BaseMean",
+                                                   #                     "T BaseMean")],
+                                                   allcn,
+                                                   selected = selected_cols)
+                              ),
+                              DT::dataTableOutput('tbl')))
+             
      )
    )
 )
