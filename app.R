@@ -211,8 +211,8 @@ server <- shinyServer(function(input, output, session) {
      n <- length(files)
      
      for (i in seq(1,length(files))){
-       system(paste("cd ",out,";",annovar_app,files[i],sep = " "))
        message(paste0(i," "))
+       system(paste("cd ",out,";",annovar_app,files[i],sep = " "))
        # Increment the progress bar, and update the detail text.
        incProgress(1/n, detail = paste("File", i))
      }
