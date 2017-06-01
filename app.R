@@ -9,13 +9,7 @@ library(magrittr)
 library(DT)
 library(shinydashboard)
 
-tcga_sets_df<-data.frame(name=c("TCGA-COADREAD_mirna","TCGA-COADREAD_mrna")
-                         ,file=c("/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_mirna.rds","/home/wsm/bam/CRC/PGS/deseq2/TCGA_TN_de_rseq.rds")
-                         ,stringsAsFactors = F)
 
-annovar_folder<-basename(system("ls -d /home/wsm/RA_files/app/annovar/* ",intern = T))
-selected_cols= c("gene","cor","FoldChange", "pvalue", "padj" )
-allcn<-c("gene","type","log2FoldChange","FoldChange" ,"ratio","pvalue", "padj","baseMean" ,"N BaseMean" ,"T BaseMean" )
 header <- dashboardHeader()
 
 sidebar <-   dashboardSidebar(
@@ -24,10 +18,6 @@ sidebar <-   dashboardSidebar(
     menuItem("ANNOVAR annotation", tabName = "annovar" ,icon = icon("list-alt")),
     selectInput("annovar_folder_sel", "Folder",
                 choices = c(unique(annovar_folder)), multiple=F, selectize=TRUE,selected =  NULL,
-                width = '98%'),
-    menuItem("TCGA Expression", tabName = "tcgaexpression" ,icon = icon("list-alt")),
-    selectInput("tcga_sel", "Data sets",
-                choices = c(unique(tcga_sets_df$name)), multiple=F, selectize=TRUE,selected =  NULL,
                 width = '98%')
 
   )
@@ -56,23 +46,6 @@ body <-   dashboardBody(
                               )
                        )
   
-     ),
-     tabItem(tabName = "tcgaexpression",h2("Widgets taassdfasb content"),
-             fluidRow( column(6,
-                              h2(verbatimTextOutput('test')),
-                              checkboxInput("selcols", tags$b("Modify Columns:")),
-                              conditionalPanel(
-                                condition = "input.selcols == true",
-                                checkboxGroupInput('sel_cols', 'Columns to Display:',
-                                                   # allcn[!allcn %in% c("type",
-                                                   #                     "baseMean",
-                                                   #                     "N BaseMean",
-                                                   #                     "T BaseMean")],
-                                                   allcn,
-                                                   selected = selected_cols)
-                              ),
-                              DT::dataTableOutput('tbl')))
-             
      )
    )
 )
@@ -110,65 +83,6 @@ body <-   dashboardBody(
 ui <- dashboardPage(header, sidebar, body)
 
 server <- shinyServer(function(input, output, session) {
-  
-
-  
-  data_f <- reactive({
-    
-      cancerlist<-readRDS(tcga_sets_df[tcga_sets_df$name == input$tcga_sel,]$file)
-      # coexp_tbl = data[(cor < input$corr[2] & cor > input$corr[1]) & cor_p < input$pvalue & lncRNA==input$qgene & co_exp_gene != input$qgene,-c("lncRNA","lncRNA_start","lncRNA_end","lncRNA_strand","lncRNA_id"),with=F]
-      list(res=cancerlist[["res"]],dds=cancerlist[["dds"]],res_tab=cancerlist[["res_tab"]],factor_list=cancerlist[["factor_list"]],words=cancerlist[["words"]])
-  }) 
-  
-  
-  res_tab<- reactive({
-    dt<-data.table(data_f()$res_tab,stringsAsFactors = F)
-    #allcn<<-colnames(dt)
-    cols<-colnames(dt)[!colnames(dt) %in% c("gene","type")]
-    data.table(data_f()$res_tab)[,(cols):=lapply(.SD, function(x) as.numeric(formatC(as.numeric(x),digits =5,format = "g"))),.SDcols=cols]
-   # data.table(data_f()$res_tab)
-  })
-  
-  output$tbl = DT::renderDataTable(
-    #{
-    #datatable(
-    
-    res_tab()[,input$sel_cols, with = F],
-    #res_tab(),
-    selection = list(
-      mode = "single",
-      target = "row",
-      selected = c(1)
-    ),
-    filter = 'top',
-    caption = '',
-    options = list(
-      # dom = 'Blfrtip',
-      # # buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-      # #list(extend='csv',filename="coexpressed_gene_list.xlsx")
-      # buttons = list(list(extend='copy'),
-      #                list(extend='csv',filename=paste("coexp_gene",input$qgene,input$corr[2],input$corr[1],sep="_")),
-      #                list(extend='excel',filename=paste("coexp_gene",input$qgene,input$corr[2],input$corr[1],sep="_"))
-      #                ),
-      pageLength = 10,
-      lengthMenu = c(5, 10, 15, 20),
-      autoWidth = TRUE, scrollX=TRUE,
-      selection = 'single'
-    ),
-    rownames = FALSE
-    # )
-    #}
-    , server = T)
-  
-  output$test = renderPrint({
-  s=input$tbl_rows_selected
-  cat(input$tcga_sel)
-  cat("\n")
-  cat(as.character(res_tab()[["gene"]])[s]) 
-  })
-  
-  # s=input$tbl_rows_selected
-  # #s=input$tbl_row
   
   
 ######## aanovar 
