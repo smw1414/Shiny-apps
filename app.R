@@ -198,7 +198,7 @@ server <- shinyServer(function(input, output, session) {
     annovar_app <- switch(input$annovar_func,
                          bwa_gatk = "/home/wsm/bam/scripts/annovar/annotate_allflow_BWA_GATK.sh",
                          rnaalig = "/home/wsm/bam/scripts/annovar/annotate_allflow_RNAaligment_hg38.sh")
-    
+    ##aa
     
  # aa <-system(paste0("cd /home/wsm/RA_files/app/annovar/",input$annovar_folder_sel,"; pwd"),intern = T)
   # aa<-system("pwd",intern = T)
