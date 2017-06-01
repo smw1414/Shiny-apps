@@ -9,6 +9,7 @@ library(magrittr)
 library(DT)
 library(shinydashboard)
 ####sgdfgsdfssssasdasdass32
+annovar_folder<-basename(system("ls -d /home/wsm/RA_files/app/annovar/* ",intern = T))
 header <- dashboardHeader()
 
 sidebar <-   dashboardSidebar(
