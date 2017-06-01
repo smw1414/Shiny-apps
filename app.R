@@ -41,7 +41,8 @@ body <-   dashboardBody(
              fluidRow( column(6,
                               h3(paste0("1. Create a folder under RA_files\\app\\annovar \n")),
                               h3(paste0("2. Copy vcf files to that folder\n")),
-                              h3(paste0("3. Select the the folder you created from sidebar menu,\n or press F5 button if the folder was not existed in the drop down menu ")),
+                              h3(paste0("3. Select the the folder you created from sidebar menu,\n or press F5 if the folder was not existed in the drop down menu ")),
+                              # actionButton("close", "Close connection"),
                               h3(paste0("4. Select the Baseapsce APP type \n")),
                               h3(paste0("5. Click the button: Apply annotation \n")),
                               h3(paste0("6. Collect the annoated vcf files, the progress indicator was showed under the Apply annotation button\n")),
@@ -51,8 +52,7 @@ body <-   dashboardBody(
                               verbatimTextOutput("file_preview"),
                               verbatimTextOutput("runapp"),
                               actionButton("apply_anno", "Apply annotation"),
-                              textOutput("outlog"),
-                              h2("Widgets tab consdfasdtent")
+                              textOutput("outlog")
                               )
                        )
   
@@ -110,6 +110,9 @@ body <-   dashboardBody(
 ui <- dashboardPage(header, sidebar, body)
 
 server <- shinyServer(function(input, output, session) {
+  
+
+  
   data_f <- reactive({
     
       cancerlist<-readRDS(tcga_sets_df[tcga_sets_df$name == input$tcga_sel,]$file)
@@ -170,7 +173,16 @@ server <- shinyServer(function(input, output, session) {
   
 ######## aanovar 
   # vcf_list <- reactive({})
-
+  observe({
+    x<-basename(system("ls -d /home/wsm/RA_files/app/annovar/* ",intern = T))
+    updateSelectInput(session, "annovar_folder_sel",
+                      label = paste("Folder"),
+                      choices = x,
+                      selected = tail(x, 1))
+    
+  })
+  
+  
   output$file_preview <- renderPrint({
     cat("First 10 files were showed\n")
     cat(input$annovar_folder_sel)
@@ -226,6 +238,10 @@ server <- shinyServer(function(input, output, session) {
     })
   })
   
+  # observe({
+  #   if (input$close > 0) stopApp() # stop shiny
+  # })
+  
   enable_act_but<-function(){
     #message("enable but")
    
@@ -242,7 +258,8 @@ server <- shinyServer(function(input, output, session) {
     shinyjs::disable("annovar_folder_sel")
     shinyjs::disable("tcga_sel")
     shinyjs::disable("annovar_func")
-   }
+  }
+  session$allowReconnect(TRUE)
 }
 )
 shinyApp(ui, server)
