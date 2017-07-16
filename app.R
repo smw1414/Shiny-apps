@@ -250,10 +250,11 @@ server <- shinyServer(function(input, output, session) {
     
     message(paste0("folder",input$bammerge_folder_sel))
     message(paste0("file: ",input$newbamname))
-    wd=paste("/home/wsm/RA_files/app/bam_merge/",input$bammerge_folder_sel,sep = "/")
+    wd=paste("/home/wsm/RA_files/app/bam_merge",input$bammerge_folder_sel,sep = "/")
    
+    outname=make.names(input$newbamname)
      message(paste(run_app,"-i",wd,"-o",input$newbamname,sep = " "))
-    system(paste(run_app,"-i",wd,"-o",input$newbamname,sep = " "))  
+    system(paste(run_app,"-i",wd,"-o",outname,sep = " "))  
     
     system(paste0("chmod 777 -R /home/wsm/RA_files/app/"))
     enable_act_but()
