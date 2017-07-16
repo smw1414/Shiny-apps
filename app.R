@@ -33,11 +33,18 @@ sidebar <-   dashboardSidebar(
 )
 
 body <-   dashboardBody(
+  tags$head(
+    tags$style(HTML("
+      @import url('//fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
+    "))
+  ),
   useShinyjs(),
    tabItems(
      
      tabItem(tabName = "annovar",
              fluidRow( column(6,
+                              h1("ANNOVAR annotation", 
+                                 style = "font-family: 'Times New Roman', font-weight: 500; line-height: 1.1; color:  #ad1d28;"),
                               h3(paste0("1. Create a folder under RA_files\\app\\annovar \n")),
                               h3(paste0("2. Copy vcf files to that folder\n")),
                               h3(paste0("3. Select the the folder you created from sidebar menu,\n or press F5 if the folder was not existed in the drop down menu ")),
@@ -59,6 +66,8 @@ body <-   dashboardBody(
      ,
      tabItem(tabName = "cat_fastq",
               fluidRow( column(6,
+                               h1("FASTQ CAT", 
+                                  style = "font-family: 'Times New Roman', font-weight: 500; line-height: 1.1; color:  #ad1d28;"),
                               h3(paste0("1. Create a folder under RA_files\\app\\cat_fastq \n")),
                               h3(paste0("2. Copy fastq files to that folder\n")),
                               h3(paste0("3. Select the the folder you created from sidebar menu,\n or press F5 if the folder was not existed in the drop down menu ")),
@@ -79,12 +88,14 @@ body <-   dashboardBody(
      ),
      tabItem(tabName = "merge_bam",
              fluidRow( column(6,
+                              h1("BAM merge", 
+                                 style = "font-family: 'Times New Roman', font-weight: 500; line-height: 1.1; color:  #ad1d28;"),
                               h3(paste0("1. Create a folder under RA_files\\app\\merge_bam \n")),
                               h3(paste0("2. Copy bam files to the folder you just created\n")),
                               h3(paste0("3. Select the the folder you created from sidebar menu,\n or press F5 if the folder was not existed in the drop down menu ")),
                               h3(paste0("4. Fill the new merged bam below\n")),
                               h3(paste0("5. Click the button: Merge bam \n")),
-                              h3(paste0("6. Collect merged bam file in the folder you just created, the progress indicator was showed under the Merge fastq button\n")),
+                              h3(paste0("6. Access and the \"merged\" folder under the folder you just created and collect the merged bam file\n")),
                              
                               textInput("newbamname", label = h3("New file name (Do not add .bam)"), value = "Enter_new_name_here"),
                               verbatimTextOutput("file_preview_mergebam"),
